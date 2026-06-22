@@ -222,7 +222,15 @@ let pendingAiBlob = null;
 let keptAiImage  = null;
 
 function loadBooks() {
-  try { const r=localStorage.getItem(STORAGE_KEY); if(r){books=JSON.parse(r);return;} } catch(e){}
+  try {
+    const r=localStorage.getItem(STORAGE_KEY);
+    if(r){
+      books=JSON.parse(r);
+      // Re-attach stored images
+      books.forEach(function(b){ b.aiImage = loadImage(b.id); });
+      return;
+    }
+  } catch(e){}
   books=[
     {id:"wotm",   shelf:"read",title:"The Will of the Many",       author:"James Islington",   pages:672,rating:5,genre:"Epic Fantasy",     color:"#0e1a38",text:"A masterclass in slow-burn dark academia fantasy. Vis navigates a cutthroat academy with a dangerous secret. Meticulous plotting and one of the best magic systems in years.",verdict:"A towering debut saga."},
     {id:"pachinko",shelf:"read",title:"Pachinko",                   author:"Min Jin Lee",       pages:496,rating:5,genre:"Literary Fiction", color:"#1a4a42",text:"Four generations of a Korean family in 20th-century Japan. Spare prose, immense emotional weight. Devastating and life-affirming.",verdict:"One of the great novels of the century."},
@@ -232,7 +240,26 @@ function loadBooks() {
     {id:"demoncopp",shelf:"want",title:"Demon Copperhead",          author:"Barbara Kingsolver",pages:560,rating:0,genre:"Literary Fiction", color:"#1c3530",text:"Pulitzer-winning retelling of David Copperfield in opioid-ravaged Appalachia.",verdict:"On every best-of-decade list already."}
   ];
 }
-function saveBooks(){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(books));}catch(e){} }
+function saveBooks(){
+  try {
+    // Save books without aiImage blobs (stored separately)
+    var slim = books.map(function(b){
+      var copy = Object.assign({}, b);
+      delete copy.aiImage;
+      return copy;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
+  } catch(e){ console.warn("saveBooks failed", e); }
+}
+function saveImage(id, base64){
+  try { localStorage.setItem("bsimg_"+id, base64); } catch(e){ console.warn("Image save failed - localStorage full?", e); }
+}
+function loadImage(id){
+  try { return localStorage.getItem("bsimg_"+id)||null; } catch(e){ return null; }
+}
+function deleteImage(id){
+  try { localStorage.removeItem("bsimg_"+id); } catch(e){}
+}
 
 function getWorkerUrl(){ return localStorage.getItem(WORKER_KEY)||""; }
 
@@ -413,7 +440,7 @@ function openReview(id){
 }
 function closeReview(){document.getElementById("review-overlay").classList.remove("active");currentBookId=null;}
 function moveBook(id){var b=books.find(function(x){return x.id===id;});if(!b)return;b.shelf=b.shelf==="read"?"want":"read";saveBooks();renderShelves();closeReview();}
-function deleteBook(id){var b=books.find(function(x){return x.id===id;});if(!confirm('Delete "'+b.title+'"?'))return;books=books.filter(function(x){return x.id!==id;});saveBooks();renderShelves();closeReview();}
+function deleteBook(id){var b=books.find(function(x){return x.id===id;});if(!confirm('Delete "'+b.title+'"?'))return;deleteImage(id);books=books.filter(function(x){return x.id!==id;});saveBooks();renderShelves();closeReview();}
 
 function openAdd(shelf){
   editingId=null;pendingAiBlob=null;keptAiImage=null;
@@ -468,13 +495,32 @@ async function saveBook(){
   if(!title){alert("Please enter a title.");return;}
   var btn=document.getElementById("save-btn");
   btn.disabled=true;btn.textContent="Saving...";
-  var aiImage=keptAiImage||null;
+  // Determine the book id first
+  var bookId = editingId || ("book_"+Date.now());
+
+  // Handle image: convert new blob, keep existing, or clear
+  var aiImage = null;
   if(pendingAiBlob){
-    try{ aiImage=await blobToBase64(pendingAiBlob); }catch(e){console.warn(e);}
+    try{
+      aiImage = await blobToBase64(pendingAiBlob);
+      saveImage(bookId, aiImage);
+    } catch(e){ console.warn("Image convert failed", e); }
+  } else if(keptAiImage){
+    aiImage = keptAiImage;
+    // already stored, no need to re-save
+  } else {
+    // Cleared — remove stored image
+    deleteImage(bookId);
   }
+
   var data={title:title,author:document.getElementById("f-author").value.trim(),pages:parseInt(document.getElementById("f-pages").value)||300,genre:document.getElementById("f-genre").value.trim(),shelf:document.getElementById("f-shelf").value,text:document.getElementById("f-text").value.trim(),verdict:document.getElementById("f-verdict").value.trim(),color:document.getElementById("f-color").value,rating:pickedRating,aiImage:aiImage};
-  if(editingId){var i=books.findIndex(function(x){return x.id===editingId;});books[i]=Object.assign({},books[i],data);}
-  else{data.id="book_"+Date.now();books.push(data);}
+  if(editingId){
+    var i=books.findIndex(function(x){return x.id===editingId;});
+    books[i]=Object.assign({},books[i],data);
+  } else {
+    data.id=bookId;
+    books.push(data);
+  }
   saveBooks();renderShelves();
   btn.disabled=false;btn.textContent="Save";
   closeEdit();
