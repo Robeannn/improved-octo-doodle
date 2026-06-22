@@ -111,6 +111,10 @@
 
 <h1>My Bookshelf</h1>
 <p class="subtitle">click a book to open &middot; use the + button to add</p>
+<div style="text-align:center;margin-bottom:2rem">
+  <button class="btn btn-ai" id="regen-all-btn" onclick="regenAllSpines()" style="font-size:13px;padding:8px 18px">&#10024; Regenerate all spines</button>
+  <p id="regen-status" style="font-size:12px;color:#9999b0;margin-top:8px;min-height:18px"></p>
+</div>
 
 <div class="shelf-section">
   <div class="shelf-header">
@@ -220,6 +224,47 @@ let currentBookId = null;
 let pickedRating = 0;
 let pendingAiBlob = null;
 let keptAiImage  = null;
+
+async function regenAllSpines(){
+  const workerUrl = getWorkerUrl();
+  if(!workerUrl){
+    document.getElementById("regen-status").textContent = "Connect your Worker URL first — click + on any shelf.";
+    return;
+  }
+  const btn = document.getElementById("regen-all-btn");
+  const status = document.getElementById("regen-status");
+  btn.disabled = true;
+  const total = books.length;
+  let done = 0, failed = 0;
+
+  for(var i = 0; i < books.length; i++){
+    var b = books[i];
+    status.textContent = "Generating " + (done+failed+1) + " of " + total + ": " + b.title + "...";
+    try {
+      const res = await fetch(workerUrl, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({title:b.title, author:b.author, genre:b.genre, color:b.color})
+      });
+      if(!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const base64 = await blobToBase64(blob);
+      b.aiImage = base64;
+      saveImage(b.id, base64);
+      done++;
+    } catch(e){
+      console.warn("Failed for " + b.title + ":", e);
+      failed++;
+    }
+    // Small delay between requests to avoid rate limiting
+    await new Promise(function(r){ setTimeout(r, 500); });
+  }
+
+  saveBooks();
+  renderShelves();
+  btn.disabled = false;
+  status.textContent = done + " spines generated" + (failed > 0 ? ", " + failed + " failed (click to retry)" : " ✓");
+}
 
 function loadBooks() {
   try {
@@ -399,11 +444,13 @@ function renderShelves(){
       div.onclick=function(){openReview(b.id);};
       var inner='<div class="book-body" style="width:'+w+'px;height:'+h+'px;">';
       if(b.aiImage){
+        // AI image includes the title — no text overlay needed
         inner+='<img class="spine-img" src="'+b.aiImage+'" alt="'+b.title+'">';
       } else {
         inner+='<canvas width="'+w+'" height="'+h+'" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>';
+        inner+='<div class="book-label"><span>'+b.title+'</span></div>';
       }
-      inner+='<div class="book-label"><span>'+b.title+'</span></div><div class="book-pages"></div></div>';
+      inner+='<div class="book-pages"></div></div>';
       if(shelf==="want") inner='<div class="bm"></div>'+inner;
       div.innerHTML=inner;
       el.appendChild(div);
