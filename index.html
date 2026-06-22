@@ -6,218 +6,109 @@
 <title>My Bookshelf</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0f0f13;
-    --bg2: #18181f;
-    --bg3: #222230;
-    --surface: #1e1e2a;
-    --border: rgba(255,255,255,0.1);
-    --border2: rgba(255,255,255,0.18);
-    --text: #e8e8f0;
-    --text2: #9999b0;
-    --text3: #55556a;
-    --accent: #6c5ce7;
-    --accent2: #a29bfe;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --plank: #5a3e22;
-    --plank-top: #7a5530;
+    --bg:#0f0f13; --bg2:#18181f; --bg3:#222230; --surface:#1e1e2a;
+    --border:rgba(255,255,255,0.1); --border2:rgba(255,255,255,0.18);
+    --text:#e8e8f0; --text2:#9999b0; --text3:#55556a;
+    --accent:#6c5ce7; --accent2:#a29bfe;
+    --radius:10px; --radius-sm:6px;
+    --plank:#5a3e22; --plank-top:#7a5530;
   }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 2rem 1rem 4rem;
-  }
-
-  h1 {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--text);
-    margin-bottom: 0.25rem;
-    letter-spacing: 0.02em;
-  }
-  .subtitle { text-align: center; font-size: 13px; color: var(--text3); margin-bottom: 2.5rem; }
-
-  /* ── Shelves ── */
-  .shelf-section { margin-bottom: 3rem; }
-  .shelf-header {
-    display: flex; align-items: center; justify-content: space-between;
-    max-width: 700px; margin: 0 auto 0.5rem;
-    padding: 0 1rem;
-  }
-  .shelf-label { font-size: 13px; font-weight: 500; color: var(--text2); letter-spacing: 0.04em; text-transform: uppercase; }
-  .shelf-count { font-size: 11px; color: var(--text3); }
-
-  .shelf-wrapper { position: relative; display: flex; justify-content: center; overflow-x: auto; padding-bottom: 18px; }
-  .shelf {
-    display: flex; align-items: flex-end; gap: 12px;
-    padding: 24px 40px 0; position: relative; z-index: 1;
-    min-width: max-content;
-  }
-  .plank {
-    position: absolute; bottom: 4px; left: 0; right: 0; height: 14px;
-    background: var(--plank); border-radius: 0 0 4px 4px;
-    box-shadow: 0 5px 14px rgba(0,0,0,0.55); z-index: 0;
-  }
-  .plank::before {
-    content: ''; position: absolute; inset: 0;
-    border-top: 2px solid var(--plank-top); border-radius: 0 0 4px 4px;
-  }
-
-  /* ── Books ── */
-  .book { cursor: pointer; transition: transform 0.28s cubic-bezier(.4,0,.2,1); user-select: none; position: relative; flex-shrink: 0; }
-  .book:hover { transform: translateY(-9px) rotate(-1.5deg); }
-  .book-body {
-    border-radius: 2px 5px 5px 2px; position: relative; overflow: hidden;
-    box-shadow: 3px 3px 12px rgba(0,0,0,0.5), inset -4px 0 8px rgba(0,0,0,0.2);
-  }
-  .book-pages {
-    position: absolute; right: -4px; top: 4px; bottom: 4px; width: 5px;
-    background: repeating-linear-gradient(to bottom,#ede3cc 0,#ede3cc 2px,#c8b88a 2px,#c8b88a 3px);
-    border-radius: 0 2px 2px 0;
-  }
-  .book-label {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    z-index: 2; pointer-events: none;
-  }
-  .book-label span {
-    writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
-    font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.92);
-    letter-spacing: 0.07em; text-shadow: 0 1px 4px rgba(0,0,0,0.7);
-    padding: 6px 0; line-height: 1.3; text-align: center;
-  }
-  .want-shelf .book-body { opacity: 0.72; }
-  .want-shelf .book:hover .book-body { opacity: 1; }
-  .bm {
-    position: absolute; top: -5px; right: 7px; width: 9px; height: 16px;
-    background: #d4891a; clip-path: polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);
-    z-index: 4;
-  }
-
-  /* Add book button on shelf */
-  .add-book-btn {
-    width: 36px; height: 130px; border-radius: 4px;
-    border: 1.5px dashed rgba(255,255,255,0.15);
-    background: transparent; color: rgba(255,255,255,0.2);
-    font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: border-color 0.2s, color 0.2s; flex-shrink: 0;
-    align-self: flex-end;
-  }
-  .add-book-btn:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.5); }
-
-  /* ── Overlays ── */
-  .overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.72); z-index: 100;
-    align-items: center; justify-content: center; padding: 1rem;
-  }
-  .overlay.active { display: flex; animation: fi 0.2s ease; }
-  @keyframes fi { from{opacity:0} to{opacity:1} }
-
-  .panel {
-    background: var(--surface); border-radius: var(--radius);
-    border: 0.5px solid var(--border2); width: 100%; overflow: hidden;
-    animation: su 0.26s cubic-bezier(.4,0,.2,1); position: relative;
-    max-height: 90vh; overflow-y: auto;
-  }
-  @keyframes su { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
-
-  /* ── Review panel ── */
-  #review-panel { max-width: 420px; }
-  .review-top {
-    padding: 1.2rem 1.2rem 1rem; border-bottom: 0.5px solid var(--border);
-    display: flex; gap: 14px; align-items: flex-start;
-  }
-  .rv-mini { width: 34px; height: 52px; border-radius: 2px 4px 4px 2px; flex-shrink: 0; box-shadow: 2px 2px 6px rgba(0,0,0,0.4); overflow: hidden; }
-  .rv-title { font-size: 15px; font-weight: 500; color: var(--text); margin: 0 0 2px; }
-  .rv-author { font-size: 12px; color: var(--text2); margin: 0 0 6px; }
-  .stars { display: flex; gap: 3px; }
-  .star { width: 13px; height: 13px; }
-  .review-body { padding: 1rem 1.2rem; }
-  .tag {
-    display: inline-block; font-size: 11px; font-weight: 500;
-    padding: 3px 9px; border-radius: var(--radius-sm); margin-bottom: 9px;
-    background: rgba(108,92,231,0.2); color: var(--accent2); border: 0.5px solid rgba(108,92,231,0.4);
-  }
-  .tag.want { background: rgba(212,137,26,0.2); color: #f0a94a; border-color: rgba(212,137,26,0.4); }
-  .rv-text { font-size: 13px; color: var(--text2); line-height: 1.75; margin: 0 0 10px; }
-  .rv-verdict { font-size: 12px; font-weight: 500; border-left: 3px solid var(--accent); padding-left: 9px; color: var(--text); }
-  .rv-pages { font-size: 11px; color: var(--text3); margin-top: 8px; }
-  .review-actions {
-    padding: 0.75rem 1.2rem; border-top: 0.5px solid var(--border);
-    display: flex; gap: 8px; flex-wrap: wrap;
-  }
-
-  /* ── Edit / Add panel ── */
-  #edit-panel { max-width: 480px; }
-  .panel-title { font-size: 16px; font-weight: 500; color: var(--text); padding: 1.2rem 1.2rem 0; }
-  .form-body { padding: 1rem 1.2rem 0.5rem; display: flex; flex-direction: column; gap: 12px; }
-  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 4px; }
-  input[type=text], input[type=number], textarea, select {
-    width: 100%; background: var(--bg3); border: 0.5px solid var(--border2);
-    border-radius: var(--radius-sm); color: var(--text); font-size: 13px;
-    padding: 8px 10px; outline: none; font-family: inherit;
-    transition: border-color 0.15s;
-  }
-  input[type=text]:focus, input[type=number]:focus, textarea:focus, select:focus {
-    border-color: var(--accent);
-  }
-  textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
-  select option { background: var(--bg2); }
-  .star-picker { display: flex; gap: 6px; }
-  .star-pick {
-    width: 24px; height: 24px; cursor: pointer; background: none; border: none;
-    padding: 0; color: #444; font-size: 20px; transition: color 0.15s;
-  }
-  .star-pick.on { color: #e8a020; }
-  .form-actions { padding: 0.75rem 1.2rem 1.2rem; display: flex; gap: 8px; justify-content: flex-end; }
-
-  /* ── Buttons ── */
-  .btn {
-    font-size: 12px; font-weight: 500; padding: 7px 14px;
-    border-radius: var(--radius-sm); border: 0.5px solid var(--border2);
-    cursor: pointer; transition: background 0.15s, opacity 0.15s;
-    background: transparent; color: var(--text2); font-family: inherit;
-  }
-  .btn:hover { background: var(--bg3); color: var(--text); }
-  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .btn-primary:hover { opacity: 0.88; background: var(--accent); }
-  .btn-danger { color: #f07070; border-color: rgba(240,112,112,0.3); }
-  .btn-danger:hover { background: rgba(240,112,112,0.1); }
-
-  .close-btn {
-    position: absolute; top: 12px; right: 12px;
-    background: var(--bg3); border: 0.5px solid var(--border);
-    border-radius: 50%; width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--text2); font-size: 16px; transition: background 0.15s;
-  }
-  .close-btn:hover { background: var(--bg); }
-
-  /* spine color preview */
-  .color-row { display: flex; gap: 8px; align-items: center; }
-  .color-row input[type=color] { width: 36px; height: 32px; border: 0.5px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; background: none; padding: 2px; }
-  .color-swatches { display: flex; gap: 6px; flex-wrap: wrap; }
-  .swatch { width: 22px; height: 22px; border-radius: 4px; cursor: pointer; border: 1.5px solid transparent; transition: border-color 0.15s; }
-  .swatch:hover, .swatch.sel { border-color: #fff; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
-
-  .empty-shelf { font-size: 12px; color: var(--text3); padding: 20px 0 10px; align-self: flex-end; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:2rem 1rem 4rem; }
+  h1 { text-align:center; font-size:22px; font-weight:500; margin-bottom:0.25rem; }
+  .subtitle { text-align:center; font-size:13px; color:var(--text3); margin-bottom:2.5rem; }
+  .shelf-section { margin-bottom:3rem; }
+  .shelf-header { display:flex; align-items:center; justify-content:space-between; max-width:700px; margin:0 auto 0.5rem; padding:0 1rem; }
+  .shelf-label { font-size:13px; font-weight:500; color:var(--text2); letter-spacing:.04em; text-transform:uppercase; }
+  .shelf-count { font-size:11px; color:var(--text3); }
+  .shelf-wrapper { position:relative; display:flex; justify-content:center; overflow-x:auto; padding-bottom:18px; }
+  .shelf { display:flex; align-items:flex-end; gap:12px; padding:24px 40px 0; position:relative; z-index:1; min-width:max-content; }
+  .plank { position:absolute; bottom:4px; left:0; right:0; height:14px; background:var(--plank); border-radius:0 0 4px 4px; box-shadow:0 5px 14px rgba(0,0,0,.55); z-index:0; }
+  .plank::before { content:""; position:absolute; inset:0; border-top:2px solid var(--plank-top); border-radius:0 0 4px 4px; }
+  .book { cursor:pointer; transition:transform .28s cubic-bezier(.4,0,.2,1); user-select:none; position:relative; flex-shrink:0; }
+  .book:hover { transform:translateY(-9px) rotate(-1.5deg); }
+  .book-body { border-radius:2px 5px 5px 2px; position:relative; overflow:hidden; box-shadow:3px 3px 12px rgba(0,0,0,.5),inset -4px 0 8px rgba(0,0,0,.2); }
+  .book-pages { position:absolute; right:-4px; top:4px; bottom:4px; width:5px; background:repeating-linear-gradient(to bottom,#ede3cc 0,#ede3cc 2px,#c8b88a 2px,#c8b88a 3px); border-radius:0 2px 2px 0; }
+  .book-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:2; pointer-events:none; }
+  .book-label span { writing-mode:vertical-rl; text-orientation:mixed; transform:rotate(180deg); font-size:10px; font-weight:500; color:rgba(255,255,255,.92); letter-spacing:.07em; text-shadow:0 1px 4px rgba(0,0,0,.7); padding:6px 0; line-height:1.3; text-align:center; }
+  .want-shelf .book-body { opacity:.72; }
+  .want-shelf .book:hover .book-body { opacity:1; }
+  .bm { position:absolute; top:-5px; right:7px; width:9px; height:16px; background:#d4891a; clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%); z-index:4; }
+  .add-book-btn { width:36px; height:130px; border-radius:4px; border:1.5px dashed rgba(255,255,255,.15); background:transparent; color:rgba(255,255,255,.2); font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-color .2s,color .2s; flex-shrink:0; align-self:flex-end; }
+  .add-book-btn:hover { border-color:rgba(255,255,255,.4); color:rgba(255,255,255,.5); }
+  .spine-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1; }
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:100; align-items:center; justify-content:center; padding:1rem; }
+  .overlay.active { display:flex; animation:fi .2s ease; }
+  @keyframes fi{from{opacity:0}to{opacity:1}}
+  .panel { background:var(--surface); border-radius:var(--radius); border:.5px solid var(--border2); width:100%; overflow:hidden; animation:su .26s cubic-bezier(.4,0,.2,1); position:relative; max-height:90vh; overflow-y:auto; }
+  @keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  #review-panel { max-width:420px; }
+  .review-top { padding:1.2rem 1.2rem 1rem; border-bottom:.5px solid var(--border); display:flex; gap:14px; align-items:flex-start; }
+  .rv-mini { width:34px; height:52px; border-radius:2px 4px 4px 2px; flex-shrink:0; box-shadow:2px 2px 6px rgba(0,0,0,.4); overflow:hidden; }
+  .rv-title { font-size:15px; font-weight:500; color:var(--text); margin:0 0 2px; }
+  .rv-author { font-size:12px; color:var(--text2); margin:0 0 6px; }
+  .stars { display:flex; gap:3px; }
+  .star { width:13px; height:13px; }
+  .review-body { padding:1rem 1.2rem; }
+  .tag { display:inline-block; font-size:11px; font-weight:500; padding:3px 9px; border-radius:var(--radius-sm); margin-bottom:9px; background:rgba(108,92,231,.2); color:var(--accent2); border:.5px solid rgba(108,92,231,.4); }
+  .tag.want { background:rgba(212,137,26,.2); color:#f0a94a; border-color:rgba(212,137,26,.4); }
+  .rv-text { font-size:13px; color:var(--text2); line-height:1.75; margin:0 0 10px; }
+  .rv-verdict { font-size:12px; font-weight:500; border-left:3px solid var(--accent); padding-left:9px; color:var(--text); }
+  .rv-pages { font-size:11px; color:var(--text3); margin-top:8px; }
+  .review-actions { padding:.75rem 1.2rem; border-top:.5px solid var(--border); display:flex; gap:8px; flex-wrap:wrap; }
+  #edit-panel { max-width:480px; }
+  .panel-title { font-size:16px; font-weight:500; color:var(--text); padding:1.2rem 1.2rem 0; }
+  .form-body { padding:1rem 1.2rem .5rem; display:flex; flex-direction:column; gap:12px; }
+  label { font-size:12px; color:var(--text2); display:block; margin-bottom:4px; }
+  input[type=text],input[type=number],textarea,select { width:100%; background:var(--bg3); border:.5px solid var(--border2); border-radius:var(--radius-sm); color:var(--text); font-size:13px; padding:8px 10px; outline:none; font-family:inherit; transition:border-color .15s; }
+  input[type=text]:focus,input[type=number]:focus,textarea:focus,select:focus { border-color:var(--accent); }
+  textarea { resize:vertical; min-height:80px; line-height:1.6; }
+  select option { background:var(--bg2); }
+  .star-picker { display:flex; gap:6px; }
+  .star-pick { width:24px; height:24px; cursor:pointer; background:none; border:none; padding:0; color:#444; font-size:20px; transition:color .15s; }
+  .star-pick.on { color:#e8a020; }
+  .color-row { display:flex; gap:8px; align-items:center; }
+  .color-row input[type=color] { width:36px; height:32px; border:.5px solid var(--border2); border-radius:var(--radius-sm); cursor:pointer; background:none; padding:2px; }
+  .color-swatches { display:flex; gap:6px; flex-wrap:wrap; }
+  .swatch { width:22px; height:22px; border-radius:4px; cursor:pointer; border:1.5px solid transparent; transition:border-color .15s; }
+  .swatch:hover,.swatch.sel { border-color:#fff; }
+  .ai-section { background:var(--bg3); border:.5px solid var(--border); border-radius:var(--radius-sm); padding:12px; display:flex; flex-direction:column; gap:10px; }
+  .ai-section-title { font-size:12px; font-weight:500; color:var(--accent2); }
+  .ai-row { display:flex; gap:10px; align-items:center; }
+  .ai-preview { width:34px; height:52px; border-radius:3px; overflow:hidden; border:.5px solid var(--border2); flex-shrink:0; background:var(--bg2); display:flex; align-items:center; justify-content:center; }
+  .ai-preview img { width:100%; height:100%; object-fit:cover; display:block; }
+  .ai-right { display:flex; flex-direction:column; gap:6px; flex:1; }
+  .ai-status { font-size:11px; color:var(--text3); }
+  .ai-status.loading { color:var(--accent2); }
+  .ai-status.error { color:#f07070; }
+  .ai-status.ok { color:#6fcf97; }
+  .setup-banner { background:rgba(108,92,231,.1); border:.5px solid rgba(108,92,231,.3); border-radius:var(--radius-sm); padding:10px 12px; margin:10px 1.2rem 0; font-size:12px; color:var(--text2); line-height:1.6; }
+  .setup-banner.connected { background:rgba(111,207,151,.08); border-color:rgba(111,207,151,.3); }
+  .worker-input-row { display:flex; gap:8px; margin-top:8px; }
+  .worker-input-row input { flex:1; }
+  .form-actions { padding:.75rem 1.2rem 1.2rem; display:flex; gap:8px; justify-content:flex-end; }
+  .btn { font-size:12px; font-weight:500; padding:7px 14px; border-radius:var(--radius-sm); border:.5px solid var(--border2); cursor:pointer; transition:background .15s,opacity .15s; background:transparent; color:var(--text2); font-family:inherit; white-space:nowrap; }
+  .btn:hover { background:var(--bg3); color:var(--text); }
+  .btn:disabled { opacity:.4; cursor:not-allowed; }
+  .btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .btn-primary:hover { opacity:.88; }
+  .btn-ai { background:rgba(108,92,231,.15); color:var(--accent2); border-color:rgba(108,92,231,.35); font-size:12px; padding:6px 12px; }
+  .btn-ai:hover { background:rgba(108,92,231,.28); }
+  .btn-danger { color:#f07070; border-color:rgba(240,112,112,.3); }
+  .btn-danger:hover { background:rgba(240,112,112,.1); }
+  .close-btn { position:absolute; top:12px; right:12px; background:var(--bg3); border:.5px solid var(--border); border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text2); font-size:16px; transition:background .15s; }
+  .close-btn:hover { background:var(--bg); }
+  .spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,.2); border-top-color:var(--accent2); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
 </style>
 </head>
 <body>
 
 <h1>My Bookshelf</h1>
-<p class="subtitle">click a book to open · use the + button to add</p>
+<p class="subtitle">click a book to open &middot; use the + button to add</p>
 
 <div class="shelf-section">
   <div class="shelf-header">
@@ -244,9 +135,9 @@
 <!-- Review overlay -->
 <div class="overlay" id="review-overlay" onclick="overlayClick(event,'review-overlay')">
   <div class="panel" id="review-panel">
-    <button class="close-btn" onclick="closeReview()">✕</button>
+    <button class="close-btn" onclick="closeReview()">&#x2715;</button>
     <div class="review-top">
-      <div class="rv-mini"><canvas id="rv-canvas" width="34" height="52"></canvas></div>
+      <div class="rv-mini" id="rv-mini"></div>
       <div>
         <p class="rv-title" id="rv-title"></p>
         <p class="rv-author" id="rv-author"></p>
@@ -260,18 +151,19 @@
       <p class="rv-pages" id="rv-pages"></p>
     </div>
     <div class="review-actions">
-      <button class="btn btn-primary" onclick="openEdit(currentBookId)">✎ Edit</button>
+      <button class="btn btn-primary" onclick="openEdit(currentBookId)">&#x270E; Edit</button>
       <button class="btn" id="rv-move-btn" onclick="moveBook(currentBookId)"></button>
       <button class="btn btn-danger" onclick="deleteBook(currentBookId)">Delete</button>
     </div>
   </div>
 </div>
 
-<!-- Edit / Add overlay -->
+<!-- Edit/Add overlay -->
 <div class="overlay" id="edit-overlay" onclick="overlayClick(event,'edit-overlay')">
   <div class="panel" id="edit-panel">
-    <button class="close-btn" onclick="closeEdit()">✕</button>
+    <button class="close-btn" onclick="closeEdit()">&#x2715;</button>
     <p class="panel-title" id="edit-title">Add book</p>
+    <div id="setup-banner" class="setup-banner"></div>
     <div class="form-body">
       <div>
         <label>Title</label>
@@ -281,15 +173,9 @@
         <label>Author</label>
         <input type="text" id="f-author" placeholder="Author name">
       </div>
-      <div style="display:flex;gap:12px;">
-        <div style="flex:1">
-          <label>Pages</label>
-          <input type="number" id="f-pages" placeholder="e.g. 450" min="1" max="9999">
-        </div>
-        <div style="flex:1">
-          <label>Genre</label>
-          <input type="text" id="f-genre" placeholder="e.g. Fantasy">
-        </div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1"><label>Pages</label><input type="number" id="f-pages" placeholder="e.g. 450" min="1" max="9999"></div>
+        <div style="flex:1"><label>Genre</label><input type="text" id="f-genre" placeholder="e.g. Fantasy"></div>
       </div>
       <div>
         <label>Shelf</label>
@@ -298,21 +184,32 @@
           <option value="want">Want to Read</option>
         </select>
       </div>
-      <div id="rating-row">
+      <div>
         <label>Rating</label>
         <div class="star-picker" id="star-picker">
-          <button class="star-pick" data-v="1">★</button>
-          <button class="star-pick" data-v="2">★</button>
-          <button class="star-pick" data-v="3">★</button>
-          <button class="star-pick" data-v="4">★</button>
-          <button class="star-pick" data-v="5">★</button>
+          <button class="star-pick" data-v="1">&#9733;</button>
+          <button class="star-pick" data-v="2">&#9733;</button>
+          <button class="star-pick" data-v="3">&#9733;</button>
+          <button class="star-pick" data-v="4">&#9733;</button>
+          <button class="star-pick" data-v="5">&#9733;</button>
         </div>
       </div>
       <div>
-        <label>Spine colour</label>
+        <label>Spine colour (fallback when no AI art)</label>
         <div class="color-row">
           <input type="color" id="f-color" value="#2e3a6e">
           <div class="color-swatches" id="swatches"></div>
+        </div>
+      </div>
+      <div class="ai-section">
+        <p class="ai-section-title">&#10024; AI Spine Art</p>
+        <div class="ai-row">
+          <div class="ai-preview" id="ai-preview"><div class="spinner" id="ai-spinner" style="display:none"></div></div>
+          <div class="ai-right">
+            <p class="ai-status" id="ai-status">Enter title &amp; genre, then generate.</p>
+            <button class="btn btn-ai" id="ai-gen-btn" onclick="generateSpineArt()">&#10024; Generate spine art</button>
+            <button class="btn" id="ai-clear-btn" onclick="clearAiArt()" style="display:none;font-size:11px;padding:4px 10px">Remove art</button>
+          </div>
         </div>
       </div>
       <div>
@@ -326,310 +223,309 @@
     </div>
     <div class="form-actions">
       <button class="btn" onclick="closeEdit()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveBook()">Save</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveBook()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── State ──────────────────────────────────────────────────────────────────
-const STORAGE_KEY = 'myBookshelf_v1';
-const SWATCHES = ['#0e1a38','#1a4a42','#5c0a0a','#1a0e30','#3a1010','#1c3530','#2e3a6e','#3d2a5e','#1a3a1a','#4a2a10','#0a2a3a','#3a1a2a'];
+const STORAGE_KEY = "myBookshelf_v1";
+const WORKER_KEY  = "bookshelf_workerUrl";
+const SWATCHES = ["#0e1a38","#1a4a42","#5c0a0a","#1a0e30","#3a1010","#1c3530","#2e3a6e","#3d2a5e","#1a3a1a","#4a2a10","#0a2a3a","#3a1a2a"];
 
 let books = [];
 let editingId = null;
 let currentBookId = null;
 let pickedRating = 0;
-let addToShelf = 'read';
+let pendingAiBlob = null;   // Blob from generation, not yet saved
+let keptAiImage  = null;    // base64 being kept from existing book
 
 function loadBooks() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { books = JSON.parse(raw); return; }
-  } catch(e) {}
-  // defaults
-  books = [
-    {id:'wotm',shelf:'read',title:'The Will of the Many',author:'James Islington',pages:672,rating:5,genre:'Epic Fantasy',color:'#0e1a38',text:'A masterclass in slow-burn dark academia fantasy. Islington builds a Roman-inspired world where "Will" — your mental and physical energy — is literally leeched upward by the ruling class. Vis navigates a cutthroat academy while harbouring a dangerous secret identity. Meticulous plotting, a stunning ending, and one of the best magic systems in years.',verdict:'A towering debut saga — Rothfuss fans, this is your next obsession.'},
-    {id:'pachinko',shelf:'read',title:'Pachinko',author:'Min Jin Lee',pages:496,rating:5,genre:'Literary Fiction',color:'#1a4a42',text:'Four generations of a Korean family navigating discrimination, survival, and identity in 20th-century Japan. Spare, unadorned prose that carries immense emotional weight. Spans almost a century without losing intimacy with its characters. Devastating and life-affirming in equal measure.',verdict:'One of the great novels of the century. Read it slowly.'},
-    {id:'redrising',shelf:'read',title:'Red Rising',author:'Pierce Brown',pages:382,rating:4,genre:'Sci-Fi / Dystopia',color:'#5c0a0a',text:"Darrow, a Red-caste miner on Mars, goes undercover among the Gold ruling class to tear their society down from within. Brown writes action with cinematic fury — The Hunger Games crossed with a Roman epic. Fast, brutal, propulsive, and more emotionally resonant than it has any right to be.",verdict:'Explosive genre fiction with genuine heart.'},
-    {id:'babel',shelf:'want',title:'Babel',author:'R.F. Kuang',pages:546,rating:0,genre:'Dark Academia',color:'#1a0e30',text:"Set in 1830s Oxford, this dark academia fantasy explores how empire is encoded in language itself. Translation magic, colonial violence, and a cast of students slowly realising the institution they love was built on their subjugation.",verdict:'On the list for its reputation as a genre-defining read.'},
-    {id:'longway',shelf:'want',title:'The Long Way to a Small, Angry Planet',author:'Becky Chambers',pages:404,rating:0,genre:'Cosy Sci-Fi',color:'#3a1010',text:'A crew of misfits tunnel through deep space in this warm, character-driven sci-fi that prioritises found family over action. The antidote to grim dystopias.',verdict:'Perfect for when you want sci-fi that feels like a hug.'},
-    {id:'demoncopp',shelf:'want',title:'Demon Copperhead',author:'Barbara Kingsolver',pages:560,rating:0,genre:'Literary Fiction',color:'#1c3530',text:'A Pulitzer Prize-winning retelling of David Copperfield set in opioid-ravaged Appalachian mountains. Kingsolver gives voice to a community rarely seen in literary fiction with fierce urgency and Dickensian sweep.',verdict:"Pulitzer-winning and on every 'best of the decade' list already."}
+  try { const r=localStorage.getItem(STORAGE_KEY); if(r){books=JSON.parse(r);return;} } catch(e){}
+  books=[
+    {id:"wotm",   shelf:"read",title:"The Will of the Many",          author:"James Islington",  pages:672,rating:5,genre:"Epic Fantasy",     color:"#0e1a38",text:"A masterclass in slow-burn dark academia fantasy. Vis navigates a cutthroat academy with a dangerous secret. Meticulous plotting and one of the best magic systems in years.",verdict:"A towering debut saga."},
+    {id:"pachinko",shelf:"read",title:"Pachinko",                      author:"Min Jin Lee",      pages:496,rating:5,genre:"Literary Fiction", color:"#1a4a42",text:"Four generations of a Korean family in 20th-century Japan. Spare prose, immense emotional weight. Devastating and life-affirming.",verdict:"One of the great novels of the century."},
+    {id:"redrising",shelf:"read",title:"Red Rising",                   author:"Pierce Brown",    pages:382,rating:4,genre:"Sci-Fi / Dystopia",color:"#5c0a0a",text:"Darrow goes undercover to tear the Gold ruling class down. Fast, brutal, propulsive, and more emotionally resonant than it has any right to be.",verdict:"Explosive genre fiction with genuine heart."},
+    {id:"babel",   shelf:"want",title:"Babel",                         author:"R.F. Kuang",      pages:546,rating:0,genre:"Dark Academia",    color:"#1a0e30",text:"1830s Oxford — empire encoded in the language of translation magic. Colonial violence and dark academia brilliance.",verdict:"On the list for its genre-defining reputation."},
+    {id:"longway", shelf:"want",title:"The Long Way to a Small, Angry Planet",author:"Becky Chambers",pages:404,rating:0,genre:"Cosy Sci-Fi",color:"#3a1010",text:"A crew tunnelling through deep space. Warm, character-driven, found-family sci-fi.",verdict:"Sci-fi that feels like a hug."},
+    {id:"demoncopp",shelf:"want",title:"Demon Copperhead",             author:"Barbara Kingsolver",pages:560,rating:0,genre:"Literary Fiction",color:"#1c3530",text:"Pulitzer-winning retelling of David Copperfield in opioid-ravaged Appalachia.",verdict:"On every best-of-decade list already."}
   ];
 }
+function saveBooks(){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(books));}catch(e){} }
 
-function saveBooks() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(books)); } catch(e) {}
-}
-
-// ── Spine painting ─────────────────────────────────────────────────────────
-function paintSpine(canvas, book) {
-  const w = canvas.width, h = canvas.height;
-  const ctx = canvas.getContext('2d');
-  const c = book.color || '#1a2040';
-
-  // Base fill
-  ctx.fillStyle = c;
-  ctx.fillRect(0, 0, w, h);
-
-  // Derive lighter/darker variants from base
-  const r = parseInt(c.slice(1,3),16), g = parseInt(c.slice(3,5),16), b = parseInt(c.slice(5,7),16);
-  const light = `rgba(${Math.min(r+80,255)},${Math.min(g+80,255)},${Math.min(b+80,255)},`;
-  const bright = `rgba(${Math.min(r+140,255)},${Math.min(g+140,255)},${Math.min(b+140,255)},`;
-
-  // Horizontal texture lines
-  ctx.strokeStyle = `rgba(255,255,255,0.05)`;
-  ctx.lineWidth = 0.5;
-  for (let y = 0; y < h; y += 7) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-  }
-
-  // Use first letter of title to pick a motif (deterministic per book)
-  const motif = (book.title.charCodeAt(0) + book.title.length) % 5;
-  const cx = w / 2, cy = h / 2;
-
-  if (motif === 0) {
-    // Diamond lattice
-    ctx.strokeStyle = light + '0.5)'; ctx.lineWidth = 0.6;
-    for (let y = 0; y < h; y += 12) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
-    for (let x = 0; x < w; x += 12) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-    ctx.strokeStyle = bright + '0.85)'; ctx.lineWidth = 1.1;
-    const s = Math.min(w * 0.38, 18);
-    [s, s*0.55].forEach(r2 => {
-      ctx.beginPath(); ctx.moveTo(cx,cy-r2); ctx.lineTo(cx+r2,cy); ctx.lineTo(cx,cy+r2); ctx.lineTo(cx-r2,cy); ctx.closePath(); ctx.stroke();
-    });
-    ctx.fillStyle = bright + '0.9)'; ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI*2); ctx.fill();
-  } else if (motif === 1) {
-    // Botanical stems
-    ctx.strokeStyle = light + '0.6)'; ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.moveTo(cx, h*0.85); ctx.lineTo(cx, h*0.12); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, h*0.55); ctx.quadraticCurveTo(cx-w*0.55, h*0.42, cx-w*0.32, h*0.3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, h*0.42); ctx.quadraticCurveTo(cx+w*0.55, h*0.3, cx+w*0.32, h*0.2); ctx.stroke();
-    ctx.fillStyle = bright + '0.8)';
-    [[cx,h*0.12],[cx-w*0.32,h*0.3],[cx+w*0.32,h*0.2]].forEach(([x,y]) => { ctx.beginPath(); ctx.arc(x,y,2.5,0,Math.PI*2); ctx.fill(); });
-  } else if (motif === 2) {
-    // Sun rays + circle
-    const grd = ctx.createRadialGradient(cx, cy*0.9, 2, cx, cy*0.9, w*1.2);
-    grd.addColorStop(0, light + '0.4)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grd; ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle = bright + '0.55)'; ctx.lineWidth = 0.7;
-    for (let a = 0; a < Math.PI*2; a += Math.PI/6) {
-      ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*5, cy*0.9+Math.sin(a)*5); ctx.lineTo(cx+Math.cos(a)*14, cy*0.9+Math.sin(a)*14); ctx.stroke();
-    }
-    ctx.strokeStyle = bright + '0.75)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(cx, cy*0.9, 8, 0, Math.PI*2); ctx.stroke();
-    // Scythe-like arc
-    ctx.strokeStyle = bright + '0.85)'; ctx.lineWidth = 1.3;
-    ctx.beginPath(); ctx.moveTo(cx-4, cy+h*0.22); ctx.quadraticCurveTo(cx-w*0.32, cy, cx+3, cy*0.9-6); ctx.stroke();
-  } else if (motif === 3) {
-    // Tower silhouette
-    ctx.fillStyle = light + '0.25)';
-    ctx.fillRect(w*0.3,h*0.45,w*0.4,h*0.5); ctx.fillRect(w*0.37,h*0.35,w*0.26,h*0.12); ctx.fillRect(w*0.43,h*0.28,w*0.14,h*0.1);
-    ctx.fillStyle = bright + '0.65)';
-    [[0.2,0.1],[0.75,0.07],[0.5,0.04],[0.15,0.22],[0.82,0.18]].forEach(([rx,ry]) => { ctx.beginPath(); ctx.arc(rx*w,ry*h,1,0,Math.PI*2); ctx.fill(); });
-    ctx.strokeStyle = light + '0.5)'; ctx.lineWidth = 0.8;
-    ctx.beginPath(); ctx.arc(cx, h*0.44, w*0.36, Math.PI, Math.PI*2); ctx.stroke();
+// Worker URL
+function getWorkerUrl(){ return localStorage.getItem(WORKER_KEY)||""; }
+function refreshBanner(){
+  const url=getWorkerUrl(), el=document.getElementById("setup-banner");
+  if(url){
+    el.className="setup-banner connected";
+    el.innerHTML='<strong style="color:#6fcf97">&#10003; AI Art connected</strong> &mdash; <span style="font-size:11px;opacity:.7">'+url+'</span> <button class="btn btn-danger" style="padding:3px 8px;font-size:11px;margin-left:8px" onclick="disconnectWorker()">Disconnect</button>';
   } else {
-    // Rolling hills + curve
-    ctx.fillStyle = light + '0.28)';
-    ctx.beginPath(); ctx.moveTo(0,h*0.72); ctx.quadraticCurveTo(w*0.25,h*0.52,w*0.5,h*0.65); ctx.quadraticCurveTo(w*0.75,h*0.78,w,h*0.6); ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = light + '0.18)';
-    ctx.beginPath(); ctx.moveTo(0,h*0.82); ctx.quadraticCurveTo(w*0.3,h*0.7,w*0.6,h*0.78); ctx.quadraticCurveTo(w*0.8,h*0.86,w,h*0.74); ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = bright + '0.65)'; ctx.lineWidth = 1.4;
-    ctx.beginPath(); ctx.moveTo(w*0.2,h*0.28); ctx.bezierCurveTo(w*0.7,h*0.22,w*0.1,h*0.48,w*0.75,h*0.56); ctx.stroke();
-    ctx.fillStyle = bright + '0.7)'; ctx.beginPath(); ctx.arc(w*0.2,h*0.28,2,0,Math.PI*2); ctx.fill();
+    el.className="setup-banner";
+    el.innerHTML='<strong>Setup AI Spine Art</strong> &mdash; deploy <code>worker.js</code> to Cloudflare, then paste the URL here.<div class="worker-input-row"><input type="text" id="worker-url-input" placeholder="https://your-worker.workers.dev"><button class="btn btn-primary" onclick="connectWorker()">Connect</button></div>';
+  }
+}
+function connectWorker(){
+  const el=document.getElementById("worker-url-input");
+  const val=(el?el.value:"").trim().replace(/\/$/,"");
+  if(!val)return;
+  localStorage.setItem(WORKER_KEY,val);
+  refreshBanner();
+}
+function disconnectWorker(){
+  localStorage.removeItem(WORKER_KEY);
+  refreshBanner();
+}
+
+// AI generation
+async function generateSpineArt(){
+  const workerUrl=getWorkerUrl();
+  if(!workerUrl){ setAiStatus("error","Connect your Worker URL above first."); return; }
+  const title=document.getElementById("f-title").value.trim();
+  if(!title){ setAiStatus("error","Enter a title first."); return; }
+  const author=document.getElementById("f-author").value.trim();
+  const genre =document.getElementById("f-genre").value.trim();
+  const color =document.getElementById("f-color").value;
+
+  document.getElementById("ai-gen-btn").disabled=true;
+  document.getElementById("ai-spinner").style.display="block";
+  document.getElementById("ai-preview").innerHTML='<div class="spinner"></div>';
+  setAiStatus("loading","Generating... (10-20s)");
+  pendingAiBlob=null;
+
+  try {
+    const res=await fetch(workerUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title,author,genre,color})});
+    if(!res.ok) throw new Error(await res.text()||res.statusText);
+    pendingAiBlob=await res.blob();
+    const url=URL.createObjectURL(pendingAiBlob);
+    document.getElementById("ai-preview").innerHTML='<img src="'+url+'" style="width:100%;height:100%;object-fit:cover">';
+    setAiStatus("ok","&#10003; Done! Save the book to keep it.");
+    document.getElementById("ai-clear-btn").style.display="block";
+  } catch(err){
+    document.getElementById("ai-preview").innerHTML="";
+    setAiStatus("error","Error: "+err.message);
+  } finally {
+    document.getElementById("ai-gen-btn").disabled=false;
   }
 }
 
-// ── Page → width ───────────────────────────────────────────────────────────
-function pageWidth(pages) { return Math.max(28, Math.min(60, Math.round(28 + (pages / 900) * 36))); }
-function pageHeight(pages) { return Math.max(120, Math.min(185, Math.round(130 + (pages / 900) * 60))); }
+function clearAiArt(){
+  pendingAiBlob=null; keptAiImage=null;
+  document.getElementById("ai-preview").innerHTML="";
+  document.getElementById("ai-clear-btn").style.display="none";
+  setAiStatus("","Art removed. Save to apply.");
+}
 
-// ── Render shelves ─────────────────────────────────────────────────────────
-function renderShelves() {
-  ['read','want'].forEach(shelf => {
-    const el = document.getElementById('shelf-' + shelf);
-    el.innerHTML = '';
-    const shelfBooks = books.filter(b => b.shelf === shelf);
-    document.getElementById(shelf + '-count').textContent = shelfBooks.length + ' book' + (shelfBooks.length !== 1 ? 's' : '');
+function setAiStatus(type,msg){
+  const el=document.getElementById("ai-status");
+  el.className="ai-status"+(type?" "+type:"");
+  el.innerHTML=msg;
+}
 
-    shelfBooks.forEach(b => {
-      const w = pageWidth(b.pages), h = pageHeight(b.pages);
-      const div = document.createElement('div');
-      div.className = 'book'; div.id = 'book-' + b.id; div.title = b.title;
-      div.onclick = () => openReview(b.id);
+async function blobToBase64(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result);
+    r.onerror=rej;
+    r.readAsDataURL(blob);
+  });
+}
 
-      let inner = `<div class="book-body" style="width:${w}px;height:${h}px;"><canvas width="${w}" height="${h}" style="position:absolute;inset:0;width:100%;height:100%;"></canvas><div class="book-label"><span>${b.title}</span></div><div class="book-pages"></div></div>`;
-      if (shelf === 'want') inner = '<div class="bm"></div>' + inner;
-      div.innerHTML = inner;
+// Spine painter (canvas fallback)
+function paintSpine(canvas,book){
+  const w=canvas.width,h=canvas.height,ctx=canvas.getContext("2d");
+  const c=book.color||"#1a2040";
+  ctx.fillStyle=c; ctx.fillRect(0,0,w,h);
+  const rv=parseInt(c.slice(1,3),16),gv=parseInt(c.slice(3,5),16),bv=parseInt(c.slice(5,7),16);
+  const L=(a)=>`rgba(${Math.min(rv+80,255)},${Math.min(gv+80,255)},${Math.min(bv+80,255)},${a})`;
+  const B=(a)=>`rgba(${Math.min(rv+140,255)},${Math.min(gv+140,255)},${Math.min(bv+140,255)},${a})`;
+  ctx.strokeStyle="rgba(255,255,255,0.05)"; ctx.lineWidth=0.5;
+  for(let y=0;y<h;y+=7){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  const m=(book.title.charCodeAt(0)+book.title.length)%5,cx=w/2,cy=h/2;
+  if(m===0){
+    ctx.strokeStyle=L(0.5);ctx.lineWidth=0.6;
+    for(let y=0;y<h;y+=12){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    for(let x=0;x<w;x+=12){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    ctx.strokeStyle=B(0.85);ctx.lineWidth=1.1;
+    const s=Math.min(w*0.38,18);
+    [s,s*0.55].forEach(r2=>{ctx.beginPath();ctx.moveTo(cx,cy-r2);ctx.lineTo(cx+r2,cy);ctx.lineTo(cx,cy+r2);ctx.lineTo(cx-r2,cy);ctx.closePath();ctx.stroke();});
+    ctx.fillStyle=B(0.9);ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();
+  } else if(m===1){
+    ctx.strokeStyle=L(0.6);ctx.lineWidth=0.8;
+    ctx.beginPath();ctx.moveTo(cx,h*.85);ctx.lineTo(cx,h*.12);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,h*.55);ctx.quadraticCurveTo(cx-w*.55,h*.42,cx-w*.32,h*.3);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,h*.42);ctx.quadraticCurveTo(cx+w*.55,h*.3,cx+w*.32,h*.2);ctx.stroke();
+    ctx.fillStyle=B(0.8);[[cx,h*.12],[cx-w*.32,h*.3],[cx+w*.32,h*.2]].forEach(([x,y])=>{ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();});
+  } else if(m===2){
+    const g=ctx.createRadialGradient(cx,cy*.9,2,cx,cy*.9,w*1.2);
+    g.addColorStop(0,L(0.4));g.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle=B(0.55);ctx.lineWidth=0.7;
+    for(let a=0;a<Math.PI*2;a+=Math.PI/6){ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*5,cy*.9+Math.sin(a)*5);ctx.lineTo(cx+Math.cos(a)*14,cy*.9+Math.sin(a)*14);ctx.stroke();}
+    ctx.strokeStyle=B(0.75);ctx.lineWidth=1;ctx.beginPath();ctx.arc(cx,cy*.9,8,0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle=B(0.85);ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(cx-4,cy+h*.22);ctx.quadraticCurveTo(cx-w*.32,cy,cx+3,cy*.9-6);ctx.stroke();
+  } else if(m===3){
+    ctx.fillStyle=L(0.25);ctx.fillRect(w*.3,h*.45,w*.4,h*.5);ctx.fillRect(w*.37,h*.35,w*.26,h*.12);ctx.fillRect(w*.43,h*.28,w*.14,h*.1);
+    ctx.fillStyle=B(0.65);[[.2,.1],[.75,.07],[.5,.04],[.15,.22],[.82,.18]].forEach(([rx,ry])=>{ctx.beginPath();ctx.arc(rx*w,ry*h,1,0,Math.PI*2);ctx.fill();});
+    ctx.strokeStyle=L(0.5);ctx.lineWidth=0.8;ctx.beginPath();ctx.arc(cx,h*.44,w*.36,Math.PI,Math.PI*2);ctx.stroke();
+  } else {
+    ctx.fillStyle=L(0.28);ctx.beginPath();ctx.moveTo(0,h*.72);ctx.quadraticCurveTo(w*.25,h*.52,w*.5,h*.65);ctx.quadraticCurveTo(w*.75,h*.78,w,h*.6);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fill();
+    ctx.strokeStyle=B(0.65);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(w*.2,h*.28);ctx.bezierCurveTo(w*.7,h*.22,w*.1,h*.48,w*.75,h*.56);ctx.stroke();
+    ctx.fillStyle=B(0.7);ctx.beginPath();ctx.arc(w*.2,h*.28,2,0,Math.PI*2);ctx.fill();
+  }
+}
+
+function pageWidth(p){return Math.max(28,Math.min(60,Math.round(28+(p/900)*36)));}
+function pageHeight(p){return Math.max(120,Math.min(185,Math.round(130+(p/900)*60)));}
+
+function renderShelves(){
+  ["read","want"].forEach(shelf=>{
+    const el=document.getElementById("shelf-"+shelf);
+    el.innerHTML="";
+    const sb=books.filter(b=>b.shelf===shelf);
+    document.getElementById(shelf+"-count").textContent=sb.length+" book"+(sb.length!==1?"s":"");
+    sb.forEach(b=>{
+      const w=pageWidth(b.pages),h=pageHeight(b.pages);
+      const div=document.createElement("div");
+      div.className="book";div.id="book-"+b.id;div.title=b.title;
+      div.onclick=()=>openReview(b.id);
+      let inner='<div class="book-body" style="width:'+w+'px;height:'+h+'px;">';
+      if(b.aiImage){
+        inner+='<img class="spine-img" src="'+b.aiImage+'" alt="'+b.title+'">';
+      } else {
+        inner+='<canvas width="'+w+'" height="'+h+'" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>';
+      }
+      inner+='<div class="book-label"><span>'+b.title+'</span></div><div class="book-pages"></div></div>';
+      if(shelf==="want") inner='<div class="bm"></div>'+inner;
+      div.innerHTML=inner;
       el.appendChild(div);
-      paintSpine(div.querySelector('canvas'), b);
+      if(!b.aiImage) paintSpine(div.querySelector("canvas"),b);
     });
-
-    // Add button
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-book-btn'; addBtn.textContent = '+'; addBtn.title = 'Add book';
-    addBtn.style.height = '130px';
-    addBtn.onclick = () => openAdd(shelf);
-    el.appendChild(addBtn);
+    const btn=document.createElement("button");
+    btn.className="add-book-btn";btn.textContent="+";btn.title="Add book";btn.style.height="130px";
+    btn.onclick=()=>openAdd(shelf);
+    el.appendChild(btn);
   });
 }
 
-// ── Review panel ───────────────────────────────────────────────────────────
-function openReview(id) {
-  const b = books.find(x => x.id === id);
-  currentBookId = id;
-  document.getElementById('rv-title').textContent = b.title;
-  document.getElementById('rv-author').textContent = b.author;
-  document.getElementById('rv-pages').textContent = (b.pages || '?') + ' pages';
-
-  const mc = document.getElementById('rv-canvas');
-  mc.width = 34; mc.height = 52;
-  paintSpine(mc, b);
-
-  const starsEl = document.getElementById('rv-stars');
-  starsEl.innerHTML = b.shelf === 'want' || !b.rating ? '' :
-    [1,2,3,4,5].map(i => `<svg class="star" viewBox="0 0 13 13" fill="${i<=b.rating?'#e8a020':'none'}" stroke="#e8a020" stroke-width="1.2"><polygon points="6.5,1 8.1,4.8 12.5,5.2 9.3,8 10.3,12.3 6.5,10 2.7,12.3 3.7,8 0.5,5.2 4.9,4.8"/></svg>`).join('');
-
-  const tag = document.getElementById('rv-tag');
-  tag.textContent = b.shelf === 'want' ? 'Want to read' : (b.genre || 'Fiction');
-  tag.className = 'tag' + (b.shelf === 'want' ? ' want' : '');
-
-  document.getElementById('rv-text').textContent = b.text || '';
-  document.getElementById('rv-verdict').textContent = b.verdict || '';
-
-  const moveBtn = document.getElementById('rv-move-btn');
-  moveBtn.textContent = b.shelf === 'read' ? '↓ Move to Want to Read' : '↑ Move to Read';
-
-  document.getElementById('review-overlay').classList.add('active');
-}
-
-function closeReview() {
-  document.getElementById('review-overlay').classList.remove('active');
-  currentBookId = null;
-}
-
-function moveBook(id) {
-  const b = books.find(x => x.id === id);
-  if (!b) return;
-  b.shelf = b.shelf === 'read' ? 'want' : 'read';
-  if (b.shelf === 'read' && !b.rating) b.rating = 0;
-  saveBooks(); renderShelves(); closeReview();
-}
-
-function deleteBook(id) {
-  if (!confirm('Delete "' + (books.find(x=>x.id===id)||{}).title + '"?')) return;
-  books = books.filter(x => x.id !== id);
-  saveBooks(); renderShelves(); closeReview();
-}
-
-// ── Edit / Add panel ───────────────────────────────────────────────────────
-function openAdd(shelf) {
-  editingId = null; addToShelf = shelf || 'read';
-  document.getElementById('edit-title').textContent = 'Add book';
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-author').value = '';
-  document.getElementById('f-pages').value = '';
-  document.getElementById('f-genre').value = '';
-  document.getElementById('f-shelf').value = addToShelf;
-  document.getElementById('f-text').value = '';
-  document.getElementById('f-verdict').value = '';
-  document.getElementById('f-color').value = '#2e3a6e';
-  setPickedRating(0);
-  updateSwatches('#2e3a6e');
-  document.getElementById('edit-overlay').classList.add('active');
-}
-
-function openEdit(id) {
-  const b = books.find(x => x.id === id);
-  if (!b) return;
-  editingId = id;
-  closeReview();
-  document.getElementById('edit-title').textContent = 'Edit book';
-  document.getElementById('f-title').value = b.title;
-  document.getElementById('f-author').value = b.author;
-  document.getElementById('f-pages').value = b.pages || '';
-  document.getElementById('f-genre').value = b.genre || '';
-  document.getElementById('f-shelf').value = b.shelf;
-  document.getElementById('f-text').value = b.text || '';
-  document.getElementById('f-verdict').value = b.verdict || '';
-  document.getElementById('f-color').value = b.color || '#2e3a6e';
-  setPickedRating(b.rating || 0);
-  updateSwatches(b.color || '#2e3a6e');
-  document.getElementById('edit-overlay').classList.add('active');
-}
-
-function closeEdit() {
-  document.getElementById('edit-overlay').classList.remove('active');
-  editingId = null;
-}
-
-function saveBook() {
-  const title = document.getElementById('f-title').value.trim();
-  if (!title) { alert('Please enter a title.'); return; }
-  const data = {
-    title,
-    author: document.getElementById('f-author').value.trim(),
-    pages: parseInt(document.getElementById('f-pages').value) || 300,
-    genre: document.getElementById('f-genre').value.trim(),
-    shelf: document.getElementById('f-shelf').value,
-    text: document.getElementById('f-text').value.trim(),
-    verdict: document.getElementById('f-verdict').value.trim(),
-    color: document.getElementById('f-color').value,
-    rating: pickedRating
-  };
-  if (editingId) {
-    const idx = books.findIndex(x => x.id === editingId);
-    books[idx] = { ...books[idx], ...data };
+function openReview(id){
+  const b=books.find(x=>x.id===id);
+  currentBookId=id;
+  document.getElementById("rv-title").textContent=b.title;
+  document.getElementById("rv-author").textContent=b.author;
+  document.getElementById("rv-pages").textContent=(b.pages||"?")+" pages";
+  const mini=document.getElementById("rv-mini");
+  if(b.aiImage){
+    mini.innerHTML='<img src="'+b.aiImage+'" style="width:100%;height:100%;object-fit:cover">';
   } else {
-    data.id = 'book_' + Date.now();
-    books.push(data);
+    mini.innerHTML='<canvas id="rv-canvas" width="34" height="52"></canvas>';
+    paintSpine(document.getElementById("rv-canvas"),b);
   }
-  saveBooks(); renderShelves(); closeEdit();
+  document.getElementById("rv-stars").innerHTML=(b.shelf==="want"||!b.rating)?"":
+    [1,2,3,4,5].map(i=>'<svg class="star" viewBox="0 0 13 13" fill="''+'+(i<=b.rating?"#e8a020":"none")+'" stroke="#e8a020" stroke-width="1.2"><polygon points="6.5,1 8.1,4.8 12.5,5.2 9.3,8 10.3,12.3 6.5,10 2.7,12.3 3.7,8 0.5,5.2 4.9,4.8"/></svg>').join("");
+  document.getElementById("rv-stars").innerHTML=(b.shelf==="want"||!b.rating)?"":
+    [1,2,3,4,5].map(i=>`<svg class="star" viewBox="0 0 13 13" fill="${i<=b.rating?"#e8a020":"none"}" stroke="#e8a020" stroke-width="1.2"><polygon points="6.5,1 8.1,4.8 12.5,5.2 9.3,8 10.3,12.3 6.5,10 2.7,12.3 3.7,8 0.5,5.2 4.9,4.8"/></svg>`).join("");
+  const tag=document.getElementById("rv-tag");
+  tag.textContent=b.shelf==="want"?"Want to read":(b.genre||"Fiction");
+  tag.className="tag"+(b.shelf==="want"?" want":"");
+  document.getElementById("rv-text").textContent=b.text||"";
+  document.getElementById("rv-verdict").textContent=b.verdict||"";
+  document.getElementById("rv-move-btn").textContent=b.shelf==="read"?"&#x2193; Move to Want to Read":"&#x2191; Move to Read";
+  document.getElementById("review-overlay").classList.add("active");
+}
+function closeReview(){document.getElementById("review-overlay").classList.remove("active");currentBookId=null;}
+function moveBook(id){const b=books.find(x=>x.id===id);if(!b)return;b.shelf=b.shelf==="read"?"want":"read";saveBooks();renderShelves();closeReview();}
+function deleteBook(id){const b=books.find(x=>x.id===id);if(!confirm(`Delete "${b?.title}"?`))return;books=books.filter(x=>x.id!==id);saveBooks();renderShelves();closeReview();}
+
+function openAdd(shelf){
+  editingId=null;pendingAiBlob=null;keptAiImage=null;
+  document.getElementById("edit-title").textContent="Add book";
+  ["f-title","f-author","f-text","f-verdict"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("f-pages").value="";
+  document.getElementById("f-genre").value="";
+  document.getElementById("f-shelf").value=shelf||"read";
+  document.getElementById("f-color").value="#2e3a6e";
+  document.getElementById("ai-preview").innerHTML="";
+  document.getElementById("ai-clear-btn").style.display="none";
+  setAiStatus("","Enter title and genre, then generate.");
+  setPickedRating(0);
+  updateSwatches("#2e3a6e");
+  refreshBanner();
+  document.getElementById("edit-overlay").classList.add("active");
+}
+function openEdit(id){
+  const b=books.find(x=>x.id===id);if(!b)return;
+  editingId=id;pendingAiBlob=null;keptAiImage=b.aiImage||null;
+  closeReview();
+  document.getElementById("edit-title").textContent="Edit book";
+  document.getElementById("f-title").value=b.title;
+  document.getElementById("f-author").value=b.author;
+  document.getElementById("f-pages").value=b.pages||"";
+  document.getElementById("f-genre").value=b.genre||"";
+  document.getElementById("f-shelf").value=b.shelf;
+  document.getElementById("f-text").value=b.text||"";
+  document.getElementById("f-verdict").value=b.verdict||"";
+  document.getElementById("f-color").value=b.color||"#2e3a6e";
+  if(b.aiImage){
+    document.getElementById("ai-preview").innerHTML=`<img src="${b.aiImage}" style="width:100%;height:100%;object-fit:cover">`;
+    document.getElementById("ai-clear-btn").style.display="block";
+    setAiStatus("ok","Has AI art &mdash; regenerate anytime.");
+  } else {
+    document.getElementById("ai-preview").innerHTML="";
+    document.getElementById("ai-clear-btn").style.display="none";
+    setAiStatus("","No AI art yet.");
+  }
+  setPickedRating(b.rating||0);
+  updateSwatches(b.color||"#2e3a6e");
+  refreshBanner();
+  document.getElementById("edit-overlay").classList.add("active");
+}
+function closeEdit(){
+  pendingAiBlob=null;
+  document.getElementById("edit-overlay").classList.remove("active");
+  editingId=null;
+}
+async function saveBook(){
+  const title=document.getElementById("f-title").value.trim();
+  if(!title){alert("Please enter a title.");return;}
+  const btn=document.getElementById("save-btn");
+  btn.disabled=true;btn.textContent="Saving...";
+  let aiImage=keptAiImage||null;
+  if(pendingAiBlob){
+    try{ aiImage=await blobToBase64(pendingAiBlob); }catch(e){console.warn(e);}
+  }
+  const data={title,author:document.getElementById("f-author").value.trim(),pages:parseInt(document.getElementById("f-pages").value)||300,genre:document.getElementById("f-genre").value.trim(),shelf:document.getElementById("f-shelf").value,text:document.getElementById("f-text").value.trim(),verdict:document.getElementById("f-verdict").value.trim(),color:document.getElementById("f-color").value,rating:pickedRating,aiImage};
+  if(editingId){const i=books.findIndex(x=>x.id===editingId);books[i]={...books[i],...data};}
+  else{data.id="book_"+Date.now();books.push(data);}
+  saveBooks();renderShelves();
+  btn.disabled=false;btn.textContent="Save";
+  closeEdit();
 }
 
-// ── Star picker ────────────────────────────────────────────────────────────
-function setPickedRating(v) {
-  pickedRating = v;
-  document.querySelectorAll('.star-pick').forEach(btn => {
-    btn.classList.toggle('on', parseInt(btn.dataset.v) <= v);
-  });
+function setPickedRating(v){
+  pickedRating=v;
+  document.querySelectorAll(".star-pick").forEach(b=>b.classList.toggle("on",parseInt(b.dataset.v)<=v));
 }
-document.querySelectorAll('.star-pick').forEach(btn => {
-  btn.addEventListener('click', () => setPickedRating(parseInt(btn.dataset.v)));
-  btn.addEventListener('mouseover', () => {
-    document.querySelectorAll('.star-pick').forEach(b => b.classList.toggle('on', parseInt(b.dataset.v) <= parseInt(btn.dataset.v)));
-  });
-  btn.addEventListener('mouseout', () => setPickedRating(pickedRating));
+document.querySelectorAll(".star-pick").forEach(btn=>{
+  btn.addEventListener("click",()=>setPickedRating(parseInt(btn.dataset.v)));
+  btn.addEventListener("mouseover",()=>document.querySelectorAll(".star-pick").forEach(b=>b.classList.toggle("on",parseInt(b.dataset.v)<=parseInt(btn.dataset.v))));
+  btn.addEventListener("mouseout",()=>setPickedRating(pickedRating));
 });
 
-// ── Colour swatches ────────────────────────────────────────────────────────
-function updateSwatches(selected) {
-  const container = document.getElementById('swatches');
-  container.innerHTML = '';
-  SWATCHES.forEach(sw => {
-    const div = document.createElement('div');
-    div.className = 'swatch' + (sw === selected ? ' sel' : '');
-    div.style.background = sw;
-    div.title = sw;
-    div.onclick = () => {
-      document.getElementById('f-color').value = sw;
-      updateSwatches(sw);
-    };
-    container.appendChild(div);
+function updateSwatches(sel){
+  const c=document.getElementById("swatches");c.innerHTML="";
+  SWATCHES.forEach(sw=>{
+    const d=document.createElement("div");d.className="swatch"+(sw===sel?" sel":"");d.style.background=sw;d.title=sw;
+    d.onclick=()=>{document.getElementById("f-color").value=sw;updateSwatches(sw);};
+    c.appendChild(d);
   });
 }
-document.getElementById('f-color').addEventListener('input', e => updateSwatches(e.target.value));
+document.getElementById("f-color").addEventListener("input",e=>updateSwatches(e.target.value));
 
-// ── Overlay backdrop click ─────────────────────────────────────────────────
-function overlayClick(e, id) {
-  if (e.target === document.getElementById(id)) {
-    if (id === 'review-overlay') closeReview();
-    else closeEdit();
-  }
+function overlayClick(e,id){
+  if(e.target===document.getElementById(id)){if(id==="review-overlay")closeReview();else closeEdit();}
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────
 loadBooks();
 renderShelves();
 </script>
